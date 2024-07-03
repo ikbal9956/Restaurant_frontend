@@ -3,6 +3,9 @@ import "./App.css";
 import Homepage from "./pages/homepage";
 import Datapage from "./pages/restaurant";
 import Orderpage from "./pages/orderpage";
+import Viewpage from "./pages/viewDetails";
+import AddProductpage from "./pages/addProduct";
+
 import {
     createBrowserRouter,
     RouterProvider,
@@ -22,6 +25,14 @@ const router = createBrowserRouter([
   {
     path: "/order",
     element: <Orderpage></Orderpage>,
+  },
+  {
+    path: "/viewdetail/:productId",
+    element: <Viewpage></Viewpage>,
+  },
+  {
+    path: "/addProduct",
+    element: <AddProductpage></AddProductpage>,
   },
   
 ]);
