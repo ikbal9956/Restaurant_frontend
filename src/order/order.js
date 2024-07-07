@@ -1,27 +1,17 @@
-import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { PhotoIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
-import Foods from "./foods.js";
-const formData = JSON.parse(localStorage.getItem("formData"));
-export default function FoodOrder() {
-  const [orderData, setorderData] = useState({
-    customer_name: "",
-    mobile_number: "",
-    aadhar_number: "",
-    food_time: "",
-    table_number: "",
-    restaurant_id: "",
-    foods: formData,
-  });
+
+export default function Order() {
   const [restaurants, setRestaurants] = useState([]);
 
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
         const response = await axios.get(
-          "https://restaurant-vcvq.onrender.com/restaurant/list?page_limit=5"
+          "https://restaurant-vcvq.onrender.com/restaurant/list"
         );
-        setRestaurants(response.data.list);
+        setRestaurants(response.data.restaurants);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -30,25 +20,80 @@ export default function FoodOrder() {
     fetchRestaurant();
   }, []);
 
+  const [formData, setFormData] = useState({
+    customer_name: "",
+    mobile_number: "",
+    aadhar_number: "",
+    food_time: "",
+    table_number: "",
+    restaurant_id: "",
+    foods: [],
+    currentFood: { food_name: "", type: "", quantity: "" },
+  });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setorderData((prevOrderData) => ({
-      ...prevOrderData,
-      [name]: value,
-    }));
+    setFormData({ ...formData, [name]: value });
   };
+
+  const handleFoodChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      currentFood: { ...formData.currentFood, [name]: value },
+    });
+  };
+
+  const handleAddFood = () => {
+    setFormData({
+      ...formData,
+      foods: [...formData.foods, formData.currentFood],
+      currentFood: { food_name: "", type: "", quantity: "" },
+    });
+  };
+
+  const handleDeleteFood = (index) => {
+    setFormData({
+      ...formData,
+      foods: formData.foods.filter((_, i) => i !== index),
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await axios.post(
-        "https://restaurant-vcvq.onrender.com/order/create",
-        orderData
-      );
-      alert("order created successfully");
-    } catch (error) {
-      console.error("There was an error creating the restaurant!", error);
-    }
-  };
+    try{
+    const response = await fetch(
+      "https://restaurant-vcvq.onrender.com/order/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customer_name: formData.customer_name,
+          mobile_number: formData.mobile_number,
+          aadhar_number: formData.aadhar_number,
+          food_time: formData.food_time,
+          table_number: parseInt(formData.table_number),
+          restaurant_id: parseInt(formData.restaurant_id),
+          foods: formData.foods.map((food) => ({
+            food_name: food.food_name,
+            type: food.type,
+            quantity: parseInt(food.quantity),
+          })),
+        }),
+      }
+    );
+    if (response.ok) {
+      alert("Order done!");
+  } else {
+      alert("Failed to submit order. Please try again.");
+  }
+  }catch  (error) {
+    console.error("Error:", error);
+    alert("An error occurred. Please try again.");
+}
+};
 
   return (
     <div className="mx-auto mt-20 bg-gray-100 max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -56,112 +101,104 @@ export default function FoodOrder() {
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
             <h2 className="text-base font-semibold leading-7 text-gray-900">
-              FOODS
+              Customer Information
             </h2>
             <p className="mt-1 text-sm leading-6 text-gray-600">
-              Would you like to tell me about your Food ?
+              Add all the required details about the customer.
             </p>
 
-            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6"></div>
-          </div>
-
-          <div className="border-b border-gray-900/10 pb-12">
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div className="sm:col-span-3">
                 <label
                   htmlFor="customer_name"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  customer_name
+                  Customer Name
                 </label>
                 <div className="mt-2">
                   <input
                     type="text"
                     name="customer_name"
                     id="customer_name"
-                    value={orderData.customer_name}
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     onChange={handleChange}
-                    autoComplete="name"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={formData.customer_name}
                   />
                 </div>
               </div>
 
-              <div className="sm:col-span-4">
+              <div className="sm:col-span-3">
                 <label
-                  htmlFor="food_time"
+                  htmlFor="mobile_number"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  food_time
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="text"
-                    name="food_time"
-                    type="food_time"
-                    value={orderData.food_time}
-                    onChange={handleChange}
-                    autoComplete="mobile"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-
-              <div className="sm:col-span-2 ">
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  mobile_number
+                  Mobile Number
                 </label>
                 <div className="mt-2">
                   <input
                     type="text"
                     name="mobile_number"
                     id="mobile_number"
-                    value={orderData.mobile_number}
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     onChange={handleChange}
-                    autoComplete="mobile"
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={formData.mobile_number}
                   />
                 </div>
               </div>
 
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-3">
                 <label
                   htmlFor="aadhar_number"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  aadhar_number
+                  Aadhar Number
                 </label>
                 <div className="mt-2">
                   <input
                     type="text"
                     name="aadhar_number"
                     id="aadhar_number"
-                    value={orderData.aadhar_number}
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={formData.aadhar_number}
                   />
                 </div>
               </div>
 
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-3">
+                <label
+                  htmlFor="food_time"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Food Time
+                </label>
+                <div className="mt-2">
+                  <input
+                    type="datetime-local"
+                    name="food_time"
+                    id="food_time"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={handleChange}
+                    value={formData.food_time}
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-3">
                 <label
                   htmlFor="table_number"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  table_number
+                  Table Number
                 </label>
                 <div className="mt-2">
                   <input
-                    type="text"
+                    type="number"
                     name="table_number"
                     id="table_number"
-                    value={orderData.table_number}
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    value={formData.table_number}
                   />
                 </div>
               </div>
@@ -177,7 +214,7 @@ export default function FoodOrder() {
                   <select
                     name="restaurant_id"
                     id="restaurant_id"
-                    value={orderData.restaurant_id}
+                    value={formData.restaurant_id}
                     onChange={handleChange}
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   >
@@ -195,45 +232,159 @@ export default function FoodOrder() {
             </div>
           </div>
 
-          <div className="col-span-full">
-            {/* Foods_tables */}
+          <div className="border-b border-gray-900/10 pb-12">
+            <h2 className="text-base font-semibold leading-7 text-gray-900">
+              Food Details
+            </h2>
+            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="food_name"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Food Name
+                </label>
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    name="food_name"
+                    id="food_name"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={handleFoodChange}
+                    value={formData.currentFood.food_name}
+                  />
+                </div>
+              </div>
 
-            <div className="col-span-full">
-              <label
-                htmlFor="foods"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                foods
-              </label>
-              <Foods />
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="quantity"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Quantity
+                </label>
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    name="quantity"
+                    id="quantity"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={handleFoodChange}
+                    value={formData.currentFood.quantity}
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="food_id"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Type
+                </label>
+                <div className="mt-2">
+                  
+                  <select
+                    name="type"
+                    id="type"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={handleFoodChange}
+                    value={formData.currentFood.type}
+                  >
+                    <option value="" disabled>
+                      Select your restaurant
+                    </option>
+                    <option value="half">Half</option>
+                    <option value="full">Full</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <button
+                  type="button"
+                  className="mt-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  onClick={handleAddFood}
+                >
+                  Add Food
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              <h3 className="text-base font-semibold leading-7 text-gray-900">
+                Food List
+              </h3>
+              <div className="mt-4 overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Food Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Quantity
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Type
+                      </th>
+                      <th scope="col" className="relative px-6 py-3">
+                        <span className="sr-only">Delete</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {formData.foods.map((food, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {food.food_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {food.quantity}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {food.type}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            type="button"
+                            className="text-indigo-600 hover:text-indigo-900"
+                            onClick={() => handleDeleteFood(index)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
-
-          <div className="border-b border-gray-900/10 pb-12">
-            <h2 className="text-base font-semibold leading-7 text-gray-900">
-              Notifications
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-gray-600">
-              We'll always let you know about important changes, but you pick
-              what else you want to hear about.
-            </p>
+          <div className="mt-6 flex items-center justify-end gap-x-6">
+            <button
+              type="button"
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Save
+            </button>
           </div>
-        </div>
-
-        <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button
-            type="button"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Save
-          </button>
         </div>
       </form>
     </div>

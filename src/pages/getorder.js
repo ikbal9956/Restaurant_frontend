@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import Navbar from '../navbar/navbar';
-import Order from '../order/order';
-const Orderpage = () => {
+import Getorder from '../order/getorder';
+const Getorderpage = () => {
     return (
         <div>
        <Navbar/>
-       <Order/>
+       <Getorder/>
        </div>
     );
 };
 
-export default Orderpage;
+export default Getorderpage;

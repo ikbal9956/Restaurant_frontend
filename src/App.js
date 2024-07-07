@@ -5,6 +5,8 @@ import Datapage from "./pages/restaurant";
 import Orderpage from "./pages/orderpage";
 import Viewpage from "./pages/viewDetails";
 import AddProductpage from "./pages/addProduct";
+import Getorderpage from "./pages/getorder";
+
 
 import {
     createBrowserRouter,
@@ -33,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: "/addProduct",
     element: <AddProductpage></AddProductpage>,
+  },
+  {
+    path: "/getorder",
+    element: <Getorderpage></Getorderpage>,
   },
   
 ]);
