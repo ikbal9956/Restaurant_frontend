@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { PhotoIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
 
 export default function AddProduct() {
+  const [thumbnail, setThumbnail] = useState(null);
+  const [image1, setImage1] = useState(null);
+  const [image2, setImage2] = useState(null);
+  const [image3, setImage3] = useState(null);
+  const [image4, setImage4] = useState(null);
+
   const [formData, setFormData] = useState({
     name: "",
     title: "",
@@ -9,7 +16,10 @@ export default function AddProduct() {
     price: "",
     rating: "",
     thumbnail: "",
-    images: [],
+    image1: "",
+    image2: "",
+    image3: "",
+    image4: "",
     discountPercentage: "",
     description: "",
     recipe: "",
@@ -21,46 +31,88 @@ export default function AddProduct() {
     setFormData({ ...formData, [name]: value });
   };
 
-
-
-  const handleImagesChange = (e) => {
-    const files = Array.from(e.target.files);
-    const images = files.map((file) => URL.createObjectURL(file));
-    setFormData({
-      ...formData,
-      images: [...formData.images, ...images],
-    });
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setThumbnail(file);
+      setFormData({ ...formData, thumbnail: URL.createObjectURL(file) });
+    }
   };
 
-  const handleOneChange = (files) => {
-    const thumbnails = Array.from(files).map((file) => URL.createObjectURL(file));
-    setFormData({
-     ...formData,
-      thumbnail: [...formData.thumbnail,...thumbnails],
-    });
+  const handleImageChange = (e, setImage, imageKey) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setFormData({ ...formData, [imageKey]: URL.createObjectURL(file) });
+    }
+  };
+
+  const uploadFile = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "images_preset");
+
+    try {
+      const cloudName = "ikbal";
+      const resourceType = "image";
+      const api = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+
+      const res = await axios.post(api, data);
+      const { secure_url } = res.data;
+      return secure_url;
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("https://restaurant-vcvq.onrender.com/product/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: formData.name,
-        title: formData.title,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        rating: parseFloat(formData.rating),
-        thumbnail: formData.thumbnail,
-        images: formData.images,
-        discountPercentage: parseFloat(formData.discountPercentage),
-        description: formData.description,
-        recipe: formData.recipe,
-        special: formData.special,
-      }),
+    console.log({thumbnail,image1,image2,image3,image4});
+    // const thumbnail = document.getElementById("thumbnail").files[0];
+    // const image1 = document.getElementById("image1").files[0];
+    // const image2 = document.getElementById("image2").files[0];
+    // const image3 = document.getElementById("image3").files[0];
+    // const image4 = document.getElementById("image4").files[0];
+
+    const uploadedImage1 = await uploadFile(image1);
+    const uploadedImage2 = await uploadFile(image2);
+    const uploadedImage3 = await uploadFile(image3);
+    const uploadedImage4 = await uploadFile(image4);
+    const uploadedThumbnail = await uploadFile(thumbnail);
+
+    console.log({
+      uploadedThumbnail,
+      uploadedImage1,
+      uploadedImage2,
+      uploadedImage3,
+      uploadedImage4,
     });
+
+    const response = await fetch(
+      "https://restaurant-vcvq.onrender.com/product/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          title: formData.title,
+          category: formData.category,
+          price: parseFloat(formData.price),
+          rating: parseFloat(formData.rating),
+          thumbnail: uploadedThumbnail,
+          image1: uploadedImage1,
+          image2: uploadedImage2,
+          image3: uploadedImage3,
+          image4: uploadedImage4,
+          discountPercentage: parseFloat(formData.discountPercentage),
+          description: formData.description,
+          recipe: formData.recipe,
+          special: formData.special,
+        }),
+      }
+    );
 
     const result = await response.json();
     console.log(result);
@@ -124,54 +176,319 @@ export default function AddProduct() {
 
               <div className="col-span-full">
                 <label
-                  htmlFor="image"
+                  htmlFor="thumbnail"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Thumbnail of the Dish
+                </label>
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                  <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="thumbnail"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="thumbnail"
+                          name="thumbnail"
+                          type="file"
+                          className="sr-only"
+                          onChange={handleThumbnailChange}
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-span-full">
+                <label
+                  htmlFor="images"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Photos of the Dish
                 </label>
                 <div className="flex flex-wrap justify-center mt-2">
-                  {formData.images.map((image, index) => (
-                    <div
-                      key={index}
-                      className="w-1/5 px-6 py-10 mx-4 rounded-lg border border-dashed border-gray-900/25"
-                    >
-                      <div className="text-center">
-                        <img src={image} alt="Dish" className="mx-auto h-12 w-12 text-gray-300" />
-                      </div>
+                
+                  {/* <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="thumbnail"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image1"
+                          name="image1"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage1, "image1")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
                     </div>
-                  ))}
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div> */}
 
-                  <div className="w-1/5 px-6 py-10 mx-4 rounded-lg border border-dashed border-gray-900/25">
-                    <div className="text-center">
-                      <PhotoIcon
-                        className="mx-auto h-12 w-12 text-gray-300"
-                        aria-hidden="true"
-                      />
-                      <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                        <label
-                          htmlFor="images"
-                          className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                        >
-                          <span>Upload</span>
-                          <input
-                            id="images"
-                            name="images"
-                            type="file"
-                            className="sr-only"
-                            multiple
-                            onChange={handleImagesChange}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs leading-5 text-gray-600">
-                        PNG, JPG, GIF up to 10MB
-                      </p>
+                  {/* <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="thumbnail"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image2"
+                          name="image2"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage2, "image2")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
                     </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div> */}
+
+                  {/* <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="thumbnail"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image3"
+                          name="image3"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage3, "image3")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div> */}
+
+                  {/* <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="thumbnail"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image4"
+                          name="image4"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage4, "image4")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div> */}
+
+                  <div className="col-span-full">
+                <label
+                  htmlFor="image1"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Image1
+                </label>
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                  <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="image1"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image1"
+                          name="image1"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage1, "image1")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
                   </div>
-                  
                 </div>
               </div>
+
+              <div className="col-span-full">
+                <label
+                  htmlFor="image1"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Image2
+                </label>
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                  <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="image2"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image2"
+                          name="image2"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage2, "image2")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="col-span-full">
+                <label
+                  htmlFor="image3"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Image3
+                </label>
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                  <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="image3"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image3"
+                          name="image3"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage3, "image3")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="col-span-full">
+                <label
+                  htmlFor="image4"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Image4
+                </label>
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                  <div className="text-center">
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      aria-hidden="true"
+                    />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="image4"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image4"
+                          name="image4"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            handleImageChange(e, setImage4, "image4")
+                          }
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+                </div>
+              </div>
+
+
             </div>
           </div>
 
@@ -320,43 +637,6 @@ export default function AddProduct() {
               </div>
             </div>
           </div>
-             
-
-          <div className="col-span-full">
-          <label
-            htmlFor="cover-photo"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Photos at the Front
-          </label>
-          <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-            <div className="text-center">
-              <PhotoIcon
-                className="mx-auto h-12 w-12 text-gray-300"
-                aria-hidden="true"
-              />
-              <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                <label
-                  htmlFor="file-upload"
-                  className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                >
-                  <span>Upload a file</span>
-                  <input
-                    id="file-upload"
-                    name="file-upload"
-                    type="file"
-                    className="sr-only"
-                    onChange={(e) => handleOneChange(e.target.files)}
-                  />
-                </label>
-                <p className="pl-1">or drag and drop</p>
-              </div>
-              <p className="text-xs leading-5 text-gray-600">
-                PNG, JPG, GIF up to 10MB
-              </p>
-            </div>
-          </div>
-        </div>
 
           <div className="mt-6 flex items-center justify-end gap-x-6">
             <button

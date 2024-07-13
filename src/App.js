@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
 import Homepage from "./pages/homepage";
 import Datapage from "./pages/restaurant";
@@ -6,41 +6,44 @@ import Orderpage from "./pages/orderpage";
 import Viewpage from "./pages/viewDetails";
 import AddProductpage from "./pages/addProduct";
 import Getorderpage from "./pages/getorder";
-
+import LoginPage from "./pages/loginpage";
+import ProtectedPath from "./protectedPath"; 
 
 import {
     createBrowserRouter,
     RouterProvider,
     Route,
-    Link,
   } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Homepage></Homepage>,
+    element: <LoginPage />, 
+  },
+  {
+    path: "/homepage",
+    element: <ProtectedPath element={<Homepage />} />, 
   },
   {
     path: "/datapage",
-    element: <Datapage></Datapage>,
+    element: <ProtectedPath element={<Datapage />} />, 
   },
   {
     path: "/order",
-    element: <Orderpage></Orderpage>,
+    element: <ProtectedPath element={<Orderpage />} />, 
   },
   {
     path: "/viewdetail/:productId",
-    element: <Viewpage></Viewpage>,
+    element: <ProtectedPath element={<Viewpage />} />, 
   },
   {
     path: "/addProduct",
-    element: <AddProductpage></AddProductpage>,
+    element: <ProtectedPath element={<AddProductpage />} />, 
   },
   {
     path: "/getorder",
-    element: <Getorderpage></Getorderpage>,
+    element: <ProtectedPath element={<Getorderpage />} />, 
   },
-  
 ]);
 
 function App() {
