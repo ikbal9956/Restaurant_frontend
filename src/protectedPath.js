@@ -1,40 +1,11 @@
-
-// import React from 'react';
-// import { Navigate } from 'react-router-dom';
-// import {jwtDecode} from 'jwt-decode';
-
-// const ProtectedPath = ({ element }) => {
-//   const token = localStorage.getItem('token');
-
-//   if (!token) {
-//     return <Navigate to="/" />;
-//   }
-
-//   try {
-//     const { exp } = jwtDecode(token);
-//     if (exp * 1000 < Date.now()) {
-//       localStorage.removeItem('token');
-//       return <Navigate to="/" />;
-//     }
-//   } catch (error) {
-//     localStorage.removeItem('token');
-//     return <Navigate to="/" />;
-//   }
-
-//   return element;
-// };
-
-// export default ProtectedPath;
-
-
-
-
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 
 const ProtectedPath = ({ element }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
+  const isAdmin = localStorage.getItem("is_admin") === "1"; // Check if is_admin is "1" for admin
+
   const location = useLocation();
 
   if (!token) {
@@ -42,22 +13,44 @@ const ProtectedPath = ({ element }) => {
   }
 
   try {
-    const { exp, is_admin } = jwtDecode(token);
+    const { exp } = jwtDecode(token);
     if (exp * 1000 < Date.now()) {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
       return <Navigate to="/" />;
     }
 
-    const adminRoutes = ["/homepage","/order","/datapage", "/viewdetail/:productId", "/addProduct", "/getorder"];
-    const userRoutes = ["/homepage", "/order","/viewdetail/:productId"];
+    const adminRoutes = [
+      "/homepage",
+      "/order",
+      "/datapage",
+      "/viewdetail/:productId",
+      "/addProduct",
+      "/getorder",
+    ];
+    const userRoutes = ["/homepage", "/order", "/viewdetail/:productId"];
 
-    if (is_admin === false || adminRoutes.includes(location.pathname)) {
-      return element;
+    const routeMatches = (route) => {
+      const regex = new RegExp(`^${route.replace(/:[^/]+/g, "([^/]+)")}$`);
+      return regex.test(location.pathname);
+    };
+
+    if (isAdmin) {
+      // If isAdmin is true, allow access to all admin routes
+      if (adminRoutes.some((route) => routeMatches(route))) {
+        return element;
+      } else {
+        return <Navigate to="/homepage" />;
+      }
     } else {
-      return <Navigate to="/homepage" />;
+      // If isAdmin is false, allow access to all user routes
+      if (userRoutes.some((route) => routeMatches(route))) {
+        return element;
+      } else {
+        return <Navigate to="/homepage" />;
+      }
     }
   } catch (error) {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     return <Navigate to="/" />;
   }
 };

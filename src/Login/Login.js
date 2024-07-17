@@ -21,6 +21,8 @@ export default function Login() {
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem('token', data.token); // Store token
+      localStorage.setItem('is_admin', data.is_admin);
+      console.log({localStorage});
       navigate('/homepage'); 
       console.log('Login successful', data);
     } else {
