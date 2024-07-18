@@ -21,7 +21,7 @@ export default function RestaurntData() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8000/restaurant/create", formData);
+      await axios.post("https://restaurant-vcvq.onrender.com/restaurant/create", formData);
       alert("Restaurant created successfully");
     } catch (error) {
       console.error("There was an error creating the restaurant!", error);
