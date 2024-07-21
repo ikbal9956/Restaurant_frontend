@@ -15,7 +15,7 @@ export default function ViewDetails() {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          `https://restaurant-vcvq.onrender.com/product/get/${productId}`
+          `${process.env.REACT_APP_API_BASE_URL}/product/get/${productId}`
         );
         const productData = await response.json();
         if (productData.results.images) {

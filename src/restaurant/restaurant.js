@@ -2,7 +2,8 @@ import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import React, { useState } from "react";
 import axios from "axios";
 export default function RestaurntData() {
-  const [formData, setFormData] = useState({
+
+  const initialFormData = {
     restaurant_name: "",
     restaurant_full_address: "",
     email: "",
@@ -10,7 +11,14 @@ export default function RestaurntData() {
     google_map_link: "",
     owner_name: "",
     owner_mobile_number: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+
+  const handleCancel = () => {
+    setFormData(initialFormData);
+  };
+ 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
@@ -21,11 +29,12 @@ export default function RestaurntData() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("https://restaurant-vcvq.onrender.com/restaurant/create", formData);
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL}/restaurant/create`, formData);
       alert("Restaurant created successfully");
     } catch (error) {
       console.error("There was an error creating the restaurant!", error);
     }
+    setFormData(initialFormData);
   };
 
   return (
@@ -33,27 +42,15 @@ export default function RestaurntData() {
     <form onSubmit={handleSubmit}>
       <div className="space-y-12">
         <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base font-semibold leading-7 text-gray-900">
-            Profile
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-gray-600">
-            This information will be displayed publicly so be careful what you
-            share.
+        <h2 className="py-4 text-center font-bold text-3xl font-serif  leading-7 text-gray-900">
+            Add Restaurant
+            </h2>
+          <p className="mt-1 text-center font-bold font-serif text-sm leading-6 text-gray-600">
+            Here u can add your new Restaurant.
           </p>
-
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-           
-          </div>
         </div>
 
         <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base font-semibold leading-7 text-gray-900">
-            Personal Information
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-gray-600">
-            Use a permanent address where you can receive mail.
-          </p>
-
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
               <label
@@ -208,13 +205,14 @@ export default function RestaurntData() {
       <div className="mt-6 flex items-center justify-end gap-x-6">
         <button
           type="button"
-          className="text-sm font-semibold leading-6 text-gray-900"
+          className="text-sm my-5 font-semibold leading-6 text-gray-900"
+          onClick={handleCancel}
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="rounded-md bg-indigo-600 my-5 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Save
         </button>

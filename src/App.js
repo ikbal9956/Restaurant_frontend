@@ -8,6 +8,7 @@ import AddProductpage from "./pages/addProduct";
 import Getorderpage from "./pages/getorder";
 import LoginPage from "./pages/loginpage";
 import ProtectedPath from "./protectedPath"; 
+import SignUppage from "./pages/signuppage";
 
 import {
     createBrowserRouter,
@@ -21,8 +22,13 @@ const router = createBrowserRouter([
     element: <LoginPage />, 
   },
   {
+    path: "/signup",
+    element: <SignUppage />, 
+  },
+  {
     path: "/homepage",
     element: <ProtectedPath element={<Homepage />} />, 
+    // element:<Homepage/>,
   },
   {
     path: "/datapage",

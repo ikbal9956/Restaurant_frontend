@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Disclosure,
   DisclosureButton,
@@ -13,11 +13,11 @@ import {
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: "HomePage", href: "/homepage", current: false },
-  { name: "Order", href: "/order", current: false },
-  { name: "YourOrder", href: "/getorder", current: false },
-  { name: "Restaurant", href: "/datapage", current: false },
-  { name: "AddProducts", href: "/addProduct", current: false },
+  { name: "HomePage", href: "/homepage" },
+  { name: "Order", href: "/order" },
+  { name: "YourOrder", href: "/getorder" },
+  { name: "Restaurant", href: "/datapage" },
+  { name: "AddProducts", href: "/addProduct" },
 ];
 
 function classNames(...classes) {
@@ -26,6 +26,8 @@ function classNames(...classes) {
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("is_admin");
@@ -54,27 +56,30 @@ export default function Navbar() {
                 <div className="flex flex-shrink-0 items-center">
                   <img
                     className="h-8 w-auto"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
+                    src="https://tse1.mm.bing.net/th?id=OIP.3qCDvyBYLa4C0SYhwZxH_QHaGD&pid=Api&P=0&w=300&h=300"
                     alt="Your Company"
                   />
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
-                    {navigation.map((item) => (
-                      <a
-                        key={item.name}
-                        href={item.href}
-                        className={classNames(
-                          item.current
-                            ? "bg-gray-900 text-white"
-                            : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                          "rounded-md px-3 py-2 text-sm font-medium"
-                        )}
-                        aria-current={item.current ? "page" : undefined}
-                      >
-                        {item.name}
-                      </a>
-                    ))}
+                    {navigation.map((item) => {
+                      const isCurrent = location.pathname === item.href;
+                      return (
+                        <a
+                          key={item.name}
+                          href={item.href}
+                          className={classNames(
+                            isCurrent
+                              ? "bg-gray-900 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            "rounded-md px-3 py-2 text-sm font-medium"
+                          )}
+                          aria-current={isCurrent ? "page" : undefined}
+                        >
+                          {item.name}
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -85,7 +90,7 @@ export default function Navbar() {
                 >
                   <span className="absolute -inset-1.5" />
                   <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
+                  {/* <BellIcon className="h-6 w-6" aria-hidden="true" /> */}
                 </button>
 
                 {/* Profile dropdown */}
@@ -96,7 +101,7 @@ export default function Navbar() {
                       <span className="sr-only">Open user menu</span>
                       <img
                         className="h-8 w-8 rounded-full"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        src="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/restaurant-and-bar-logo-design-template-4e70184f14a764f5d47960e42e156aeb_screen.jpg?ts=1589887438"
                         alt=""
                       />
                     </MenuButton>
@@ -140,12 +145,10 @@ export default function Navbar() {
                         {({ focus }) => (
                           <a
                             href="#"
-
                             onClick={(e) => {
-                              e.preventDefault(); 
+                              e.preventDefault();
                               handleLogout();
                             }}
-                            
                             className={classNames(
                               focus ? "bg-gray-100" : "",
                               "block px-4 py-2 text-sm text-gray-700"
@@ -164,22 +167,25 @@ export default function Navbar() {
 
           <DisclosurePanel className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2">
-              {navigation.map((item) => (
-                <DisclosureButton
-                  key={item.name}
-                  as="a"
-                  href={item.href}
-                  className={classNames(
-                    item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium"
-                  )}
-                  aria-current={item.current ? "page" : undefined}
-                >
-                  {item.name}
-                </DisclosureButton>
-              ))}
+              {navigation.map((item) => {
+                const isCurrent = location.pathname === item.href;
+                return (
+                  <DisclosureButton
+                    key={item.name}
+                    as="a"
+                    href={item.href}
+                    className={classNames(
+                      isCurrent
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                      "block rounded-md px-3 py-2 text-base font-medium"
+                    )}
+                    aria-current={isCurrent ? "page" : undefined}
+                  >
+                    {item.name}
+                  </DisclosureButton>
+                );
+              })}
             </div>
           </DisclosurePanel>
         </>

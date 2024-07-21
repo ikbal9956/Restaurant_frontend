@@ -9,7 +9,7 @@ export default function Order() {
     const fetchRestaurant = async () => {
       try {
         const response = await axios.get(
-          "https://restaurant-vcvq.onrender.com/restaurant/list"
+          `${process.env.REACT_APP_API_BASE_URL}/restaurant/list`
         );
         setRestaurants(response.data.restaurants);
       } catch (error) {
@@ -20,7 +20,7 @@ export default function Order() {
     fetchRestaurant();
   }, []);
 
-  const [formData, setFormData] = useState({
+  const initialOrder = {
     customer_name: "",
     mobile_number: "",
     aadhar_number: "",
@@ -29,8 +29,13 @@ export default function Order() {
     restaurant_id: "",
     foods: [],
     currentFood: { food_name: "", type: "", quantity: "" },
-  });
+  };
 
+  const [formData, setFormData] = useState(initialOrder);
+
+  const handleCancel = () => {
+    setFormData(initialOrder);
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -61,51 +66,49 @@ export default function Order() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
-    const response = await fetch(
-      "https://restaurant-vcvq.onrender.com/order/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customer_name: formData.customer_name,
-          mobile_number: formData.mobile_number,
-          aadhar_number: formData.aadhar_number,
-          food_time: formData.food_time,
-          table_number: parseInt(formData.table_number),
-          restaurant_id: parseInt(formData.restaurant_id),
-          foods: formData.foods.map((food) => ({
-            food_name: food.food_name,
-            type: food.type,
-            quantity: parseInt(food.quantity),
-          })),
-        }),
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/order/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer_name: formData.customer_name,
+            mobile_number: formData.mobile_number,
+            aadhar_number: formData.aadhar_number,
+            food_time: formData.food_time,
+            table_number: parseInt(formData.table_number),
+            restaurant_id: parseInt(formData.restaurant_id),
+            foods: formData.foods.map((food) => ({
+              food_name: food.food_name,
+              type: food.type,
+              quantity: parseInt(food.quantity),
+            })),
+          }),
+        }
+      );
+      if (response.ok) {
+        alert("Order done!");
+      } else {
+        alert("Failed to submit order. Please try again.");
       }
-    );
-    if (response.ok) {
-      alert("Order done!");
-  } else {
-      alert("Failed to submit order. Please try again.");
-  }
-  }catch  (error) {
-    console.error("Error:", error);
-    alert("An error occurred. Please try again.");
-}
-};
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred. Please try again.");
+    }
+    setFormData(initialOrder);
+  };
 
   return (
     <div className="mx-auto mt-20 bg-gray-100 max-w-6xl px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit}>
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
-            <h2 className="text-base font-semibold leading-7 text-gray-900">
-              Customer Information
+            <h2 className="py-4 text-center font-bold text-3xl font-serif  leading-7 text-gray-900">
+              Order Now
             </h2>
-            <p className="mt-1 text-sm leading-6 text-gray-600">
-              Add all the required details about the customer.
-            </p>
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div className="sm:col-span-3">
@@ -283,7 +286,6 @@ export default function Order() {
                   Type
                 </label>
                 <div className="mt-2">
-                  
                   <select
                     name="type"
                     id="type"
@@ -292,7 +294,7 @@ export default function Order() {
                     value={formData.currentFood.type}
                   >
                     <option value="" disabled>
-                      Select your restaurant
+                     select half/full
                     </option>
                     <option value="half">Half</option>
                     <option value="full">Full</option>
@@ -371,16 +373,17 @@ export default function Order() {
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-end gap-x-6">
+          <div className="mt-6  flex items-center justify-end gap-x-6">
             <button
               type="button"
-              className="text-sm font-semibold leading-6 text-gray-900"
+              className="rounded-md bg-indigo-600 mb-5 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              onClick={handleCancel}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="rounded-md bg-indigo-600 mb-5 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               Save
             </button>
