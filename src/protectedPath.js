@@ -4,7 +4,7 @@ import {jwtDecode} from "jwt-decode";
 
 const ProtectedPath = ({ element }) => {
   const token = localStorage.getItem("token");
-  const isAdmin = localStorage.getItem("is_admin") === "1"; // Check if is_admin is "1" for admin
+  const isAdmin = localStorage.getItem("is_admin") === "true"; // Check if is_admin is "1" for admin
 
   const location = useLocation();
 
@@ -26,8 +26,9 @@ const ProtectedPath = ({ element }) => {
       "/viewdetail/:productId",
       "/addProduct",
       "/getorder",
+      "/updateOrder"
     ];
-    const userRoutes = ["/homepage", "/order", "/viewdetail/:productId"];
+    const userRoutes = ["/homepage", "/order", "/viewdetail/:productId","/updateOrder"];
 
     const routeMatches = (route) => {
       const regex = new RegExp(`^${route.replace(/:[^/]+/g, "([^/]+)")}$`);

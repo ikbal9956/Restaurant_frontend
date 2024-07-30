@@ -9,6 +9,7 @@ import Getorderpage from "./pages/getorder";
 import LoginPage from "./pages/loginpage";
 import ProtectedPath from "./protectedPath"; 
 import SignUppage from "./pages/signuppage";
+import UpdateOrderpage from "./pages/updatePage";
 
 import {
     createBrowserRouter,
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
   {
     path: "/order",
     element: <ProtectedPath element={<Orderpage />} />, 
+  },
+  {
+    path: "/updateOrder",
+    element: <ProtectedPath element={<UpdateOrderpage/>} />, 
   },
   {
     path: "/viewdetail/:productId",

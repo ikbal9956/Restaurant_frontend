@@ -123,7 +123,8 @@ export default function Product() {
                             </h3>
                             <div className="mt-1">
                               <StarRatings
-                                rating={product.rating}
+                              rating={Number(product.rating) || 0}
+                                // rating={product.rating}
                                 starRatedColor="gold"
                                 starDimension="20px"
                                 starSpacing="2px"
@@ -137,7 +138,7 @@ export default function Product() {
                       <div className="flex-shrink-0">
                         <p className="text-sm font-semibold text-white bg-blue-500 px-2 py-1 rounded-lg shadow-md">
                           {hoveredProductId === product.id
-                            ? `Discount ${product.discountPercentage}%`
+                            ? `Discount ${product.discountpercentage}%`
                             : `Rs. ${product.price}`}
                         </p>
                       </div>
