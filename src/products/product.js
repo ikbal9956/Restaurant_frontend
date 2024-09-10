@@ -20,6 +20,19 @@ export default function Product() {
   const [itemsPerPage, setItemPerPage] = useState(4);
   const [totalCount, setTotalCount] = useState(0);
   const [currentBackgroundIndex, setCurrentBackgroundIndex] = useState(0);
+  const [timeoutId, setTimeoutId] = useState(null);
+
+  const handleMouseEnter = (productId) => {
+    const id = setTimeout(() => {
+      setHoveredProductId(productId);
+    }, 500); // Delay of 1 second
+    setTimeoutId(id);
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(timeoutId); // Clear the timeout if mouse leaves before delay
+    setHoveredProductId(null);
+  };
 
   useEffect(() => {
     fetchProducts(currentPage, itemsPerPage);
@@ -30,13 +43,13 @@ export default function Product() {
       setCurrentBackgroundIndex((prevIndex) =>
         prevIndex === backgroundImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 2000);
+    }, 9000);
 
     return () => clearInterval(interval);
   }, []);
 
   const fetchProducts = async (currentPage, itemsPerPage) => {
-    console.log({ apiBaseUrl: process.env.REACT_APP_API_BASE_URL });
+    // console.log({ apiBaseUrl: process.env.REACT_APP_API_BASE_URL });
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/product/list?page=${currentPage}&page_limit=${itemsPerPage}`
@@ -55,6 +68,7 @@ export default function Product() {
     setCurrentPage((prev) =>
       prev < Math.ceil(totalCount / itemsPerPage) ? prev + 1 : prev
     );
+    
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
   return (
@@ -67,7 +81,7 @@ export default function Product() {
           <h2 className="text-4xl font-serif text-center tracking-tight text-blue-600">
             Welcome to the food
           </h2>
-          <div>
+          {/* <div>
             <input
               type="number"
               id="itemsPerPage"
@@ -76,15 +90,17 @@ export default function Product() {
               onChange={(e) => setItemPerPage(Number(e.target.value))}
               className="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
-          </div>
+          </div> */}
 
           <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
             {products.map((product) => (
               <div
                 key={product.id}
                 className="group relative transition-transform transform hover:scale-110 shadow-lg rounded-lg overflow-hidden"
-                onMouseEnter={() => setHoveredProductId(product.id)}
-                onMouseLeave={() => setHoveredProductId(null)}
+                // onMouseEnter={() => setHoveredProductId(product.id)}
+                // onMouseLeave={() => setHoveredProductId(null)}
+                onMouseEnter={() => handleMouseEnter(product.id)}
+                onMouseLeave={handleMouseLeave}
               >
                 <Link to={`/viewdetail/${product.id}`}>
                   <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
@@ -151,6 +167,7 @@ export default function Product() {
 
           <Pagination
             itemsPerPage={itemsPerPage}
+            setItemPerPage={setItemPerPage}
             totalItems={totalCount}
             currentPage={currentPage}
             paginate={paginate}
@@ -163,8 +180,86 @@ export default function Product() {
   );
 }
 
+// const Pagination = ({
+//   itemsPerPage,
+//   setItemPerPage,
+//   totalItems,
+//   currentPage,
+//   paginate,
+//   nextPage,
+//   prevPage,
+// }) => {
+//   const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+//   return (
+//     <nav className="flex items-center mt-16 opacity-50 justify-between border-spacing-5 border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow-md">
+//       <div>
+//             <input
+//               type="number"
+//               id="itemsPerPage"
+//               name="itemsPerPage"
+//               value={itemsPerPage}
+//               onChange={(e) => setItemPerPage(Number(e.target.value))}
+//               className="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//             />
+//           </div>
+//       <div className="flex flex-1 justify-between sm:hidden">
+//         <button
+//           onClick={prevPage}
+//           disabled={currentPage === 1}
+//           className="relative inline-flex items-center  rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+//         >
+//           Previous
+//         </button>
+//         <button
+//           onClick={nextPage}
+//           disabled={currentPage === totalPages}
+//           className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+//         >
+//           Next
+//         </button>
+//       </div>
+//       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+//         <div className="flex-1 flex items-center justify-between">
+//           <button
+//             onClick={prevPage}
+//             disabled={currentPage === 1}
+//             className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+//           >
+//             <span className="sr-only">Previous</span>
+//             <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+//           </button>
+//           <div className="flex-1 flex items-center justify-center space-x-2">
+//             {Array.from({ length: totalPages }, (_, index) => (
+//               <button
+//                 key={index}
+//                 onClick={() => paginate(index + 1)}
+//                 className={`relative inline-flex items-center px-2 py-1 text-sm font-semibold rounded-full ${
+//                   index + 1 === currentPage
+//                     ? "bg-indigo-900 text-white"
+//                     : "bg-gray-300 text-gray-900"
+//                 }`}
+//               />
+//             ))}
+//           </div>
+//           <button
+//             onClick={nextPage}
+//             disabled={currentPage === totalPages}
+//             className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+//           >
+//             <span className="sr-only">Next</span>
+//             <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+//           </button>
+//         </div>
+//       </div>
+//     </nav>
+//   );
+// };
+
+
 const Pagination = ({
   itemsPerPage,
+  setItemPerPage,
   totalItems,
   currentPage,
   paginate,
@@ -174,52 +269,69 @@ const Pagination = ({
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
-    <nav className="flex items-center mt-16 opacity-50 justify-between border-spacing-5 border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow-md">
-      <div className="flex flex-1 justify-between sm:hidden">
-        <button
-          onClick={prevPage}
-          disabled={currentPage === 1}
-          className="relative inline-flex items-center  rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Previous
-        </button>
-        <button
-          onClick={nextPage}
-          disabled={currentPage === totalPages}
-          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Next
-        </button>
-      </div>
-      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div className="flex-1 flex items-center justify-between">
+    <nav className="flex flex-col sm:flex-row items-center justify-between mt-16 bg-white px-4 py-3 sm:px-6 rounded-lg shadow-md">
+      <div className="flex flex-1 justify-between">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700">Item Per Page:</label>
+          <input
+            type="number"
+            id="itemsPerPage"
+            name="itemsPerPage"
+            value={itemsPerPage}
+            onChange={(e) => setItemPerPage(Number(e.target.value))}
+            className="w-16 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+          />
+        </div>
+        <div className="flex-grow flex items-center justify-center sm:hidden">
+          {currentPage > 1 && (
+            <button
+              onClick={prevPage}
+              className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300"
+            >
+              <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+            </button>
+          )}
+          <div className="mx-2 text-sm font-semibold">{currentPage} / {totalPages}</div>
+          {currentPage < totalPages && (
+            <button
+              onClick={nextPage}
+              className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300"
+            >
+              <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <button
             onClick={prevPage}
             disabled={currentPage === 1}
-            className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+            className="relative inline-flex items-center justify-center h-8 w-8 rounded-full text-gray-400 hover:bg-gray-50 focus:outline-none"
           >
-            <span className="sr-only">Previous</span>
             <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
           </button>
-          <div className="flex-1 flex items-center justify-center space-x-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                onClick={() => paginate(index + 1)}
-                className={`relative inline-flex items-center px-2 py-1 text-sm font-semibold rounded-full ${
-                  index + 1 === currentPage
-                    ? "bg-indigo-900 text-white"
-                    : "bg-gray-300 text-gray-900"
-                }`}
-              />
-            ))}
+          <div className="flex items-center justify-center space-x-2">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
+              const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + index;
+              return (
+                <button
+                  key={page}
+                  onClick={() => paginate(page)}
+                  className={`inline-flex items-center justify-center h-8 w-8 rounded-full font-medium ${
+                    page === currentPage
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
           </div>
           <button
             onClick={nextPage}
             disabled={currentPage === totalPages}
-            className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+            className="relative inline-flex items-center justify-center h-8 w-8 rounded-full text-gray-400 hover:bg-gray-50 focus:outline-none"
           >
-            <span className="sr-only">Next</span>
             <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
