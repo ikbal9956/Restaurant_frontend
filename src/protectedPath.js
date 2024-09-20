@@ -4,7 +4,7 @@ import {jwtDecode} from "jwt-decode";
 
 const ProtectedPath = ({ element }) => {
   const token = localStorage.getItem("token");
-  const isAdmin = localStorage.getItem("is_admin") === "true"; // Check if is_admin is "1" for admin
+  const isAdmin = localStorage.getItem("is_admin") === "true"; 
 
   const location = useLocation();
 
